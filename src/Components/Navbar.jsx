@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import { RxHamburgerMenu } from "react-icons/rx";
 import { RxCross1 } from "react-icons/rx";
 
-const Navbar = () => {
+const Navbar = ({noOfCompleted}) => {
     const [showHamburger,setShowHamburger] = useState(false);
     const navLinks = ["completed tasks","upcoming tasks"];
+    
 
   return (
     <>
@@ -19,7 +20,7 @@ const Navbar = () => {
     {showHamburger && <div className='flex flex-col gap-2 mb-4'>
         {navLinks.map((item,i)=>{
             return <div key={i} className='p-2 border-b-2 text-orange-400'>
-                {item}
+                {item==="completed tasks" ? `${item} (${noOfCompleted})`:item}
             </div>
         })}
         </div>}

@@ -89,6 +89,10 @@ function App() {
     setTasks(newTasks);
   }
 
+  const clearTasks = ()=>{
+    setTasks([]);
+  }
+
 
   const deleteTask = (id)=>{
     const newTasks = tasks.filter((task)=>task.id!==id);
@@ -109,7 +113,7 @@ function App() {
     <>
     <Router>
       <Routes>
-        <Route path="/" element={<Layout/>}>
+        <Route path="/" element={<Layout noOfCompleted={completedTasks.length}/>}>
           <Route index element={<TodayPending 
           tasks={tasks} 
           formData={formData} 
@@ -122,6 +126,7 @@ function App() {
            editTask={editTask}
            isEdit={isEdit}
            completeTask={completeTask}
+           clearTasks={clearTasks}
           />}/>
         </Route>
       </Routes>

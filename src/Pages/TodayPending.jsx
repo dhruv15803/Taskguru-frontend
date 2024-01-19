@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { RxPencil2 } from "react-icons/rx";
 import { ImCross } from "react-icons/im";
-import PendingTask from './PendingTask';
+import PendingTask from '../Components/PendingTask';
 
 const TodayPending = ({
     tasks,
@@ -14,7 +14,8 @@ const TodayPending = ({
     emptyTaskErrorMsg,
     editTask,
     isEdit,
-    completeTask
+    completeTask,
+    clearTasks
     }) => {
 
   return (
@@ -34,7 +35,10 @@ const TodayPending = ({
     {tasks.length!==0 ? <div>
         {tasks.map((item,i)=>{
             return <PendingTask completeTask={completeTask} editTask={editTask} deleteTask={deleteTask} key={item.id} id={item.id} title={item.title} description={item.description} />
-        })}        
+        })} 
+        <div className='justify-center flex my-4'>
+            <button onClick={clearTasks} className='border-2 rounded-lg border-orange-400 text-orange-400 hover:bg-orange-400 hover:text-white hover:duration-300 p-2'>Clear tasks</button>
+        </div>       
         </div> :  <div className='border-2 rounded-lg shadow-lg flex flex-col items-center justify-center m-8 my-36 px-4 py-8'>
         <div className='text-8xl text-orange-300'>
             <RxPencil2/>
