@@ -22,7 +22,7 @@ const TodayPending = ({
     <>
     <div className='flex gap-2 items-center mx-8 mt-12'>
         <button onClick={()=>setisTasks(!isTasks)} className='text-orange-500 text-3xl rounded-full hover:bg-orange-500 hover:text-white hover:duration-300'>{isTasks ? <ImCross/> : "+"}</button>
-        {isTasks ? <p className='text-orange-400'>Cancel task</p> :<p className='text-orange-400'>Add task</p>}
+        {isTasks ? <button onClick={()=>setisTasks(false)} className='text-orange-400'>Cancel task</button> :<button onClick={()=>setisTasks(true)} className='text-orange-400'>Add task</button>}
     </div>
     {isTasks ? <><form onSubmit={addTask} className='border-2 rounded-lg shadow-lg flex flex-col m-8 mt-24 p-4 gap-2'>
         <input value={formData.title} onChange={handleChange} className='border-b-2 p-2' type="text" name="title" id="" placeholder='Enter task'/>
