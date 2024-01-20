@@ -14,8 +14,10 @@ import errSound from './Sounds/error-sound.mp3'
 function App() {
 
   const [tasks,setTasks] = useState([]);
+  const [upcomingTasks,setUpcomingTasks] = useState([]);
   const [isTasks,setisTasks] = useState(false);
   const [emptyTaskErrorMsg,setEmptyTaskErrorMsg] = useState("");
+  const [upcomingEmptyTaskErrorMsg,setUpcomingEmptyTaskErrorMsg] = useState("");
   const [isEdit,setIsEdit] = useState(false);
   const [editId,setEditId] = useState(null);
   const [completedTasks,setCompletedTasks] = useState([]);
@@ -23,12 +25,29 @@ function App() {
   const scrollRef = useRef(null);
   const [formData,setFormData] = useState ({
     "title":"",
-    "description":""
+    "description":"",
   })
+  const [upcomingFormData,setUpcomingFormData] = useState({
+    "title":"",
+    "description":"",
+    "dueDate":new Date(),
+  })
+
+
 
   const handleChange = (e)=>{
     const {name,value} = e.target;
     setFormData(prevFormData=>{
+      return {
+        ...prevFormData,
+        [name]:value,
+      }
+    })
+  }
+
+  const handleUpcomingChange = (e)=>{
+    const {name,value} = e.target;
+    setUpcomingFormData(prevFormData=>{
       return {
         ...prevFormData,
         [name]:value,
@@ -86,7 +105,7 @@ function App() {
         },3000)
         return;
       }
-      inputRef.current.focus();
+      inputRef?.current?.focus();
       boopSoundFunction();
       setTasks(prevTasks=>{
         return [
@@ -101,8 +120,38 @@ function App() {
       setisTasks(true);
       setFormData({
         "title":"",
-        "description":""
+        "description":"",
       });
+    }
+  }
+
+
+  const upcomingAddTask = (e)=>{
+    e.preventDefault();
+    if(upcomingFormData.title===""){
+      boopSoundFunction();
+      setUpcomingEmptyTaskErrorMsg("Please enter a task");
+      setTimeout(()=>{
+        setUpcomingEmptyTaskErrorMsg("");
+      },3000)
+    }
+    else{
+      setUpcomingTasks(prevUpcomingTasks=> {
+        return [
+          ...prevUpcomingTasks,
+          {
+            "id":nanoid(),
+            "title":upcomingFormData.title,
+            "description":upcomingFormData.description,
+            "dueDate":upcomingFormData.dueDate
+          }
+        ]
+      })
+      setUpcomingFormData({
+        "title":"",
+        "description":"",
+        "dueDate":new Date(),
+      })
     }
   }
 
@@ -126,7 +175,7 @@ function App() {
     setIsEdit(false);
     setFormData({
       "title":"",
-      "description":""
+      "description":"",
     })
   }
 
@@ -154,6 +203,7 @@ function App() {
     setCompletedTasks([]);
   }
 
+  console.log(tasks);
   return (
     <>
     <Router>
@@ -175,8 +225,17 @@ function App() {
            inputRef={inputRef}
            scrollRef={scrollRef}
           />}/>
-          <Route path="completed" element={<CompletedTasks completedTasks={completedTasks} clearCompleted={clearCompleted}/>}/>
-          <Route path="upcoming" element={<UpcomingTasks/>}/>
+          <Route path="completed" element={<CompletedTasks
+           completedTasks={completedTasks}
+           clearCompleted={clearCompleted}
+          />}/>
+          <Route path="upcoming" element={<UpcomingTasks 
+          upcomingTasks={upcomingTasks}
+           upcomingFormData={upcomingFormData} 
+          handleUpcomingChange={handleUpcomingChange}
+          upcomingAddTask={upcomingAddTask}
+          upcomingEmptyTaskErrorMsg={upcomingEmptyTaskErrorMsg}
+          />}/>
         </Route>
       </Routes>
     </Router>
