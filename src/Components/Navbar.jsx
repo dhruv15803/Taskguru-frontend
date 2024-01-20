@@ -1,28 +1,28 @@
 import React, { useState } from 'react'
 import { RxHamburgerMenu } from "react-icons/rx";
 import { RxCross1 } from "react-icons/rx";
+import {NavLink,Link } from 'react-router-dom';
+
+
 
 const Navbar = ({noOfCompleted}) => {
     const [showHamburger,setShowHamburger] = useState(false);
-    const navLinks = ["completed tasks","upcoming tasks"];
-    
 
   return (
     <>
     <nav className='flex items-center p-2 bg-orange-400 text-white'>
         <div className='text-white text-2xl'>
-            TASKGURU
+            <Link to='/'>TASKGURU</Link>
         </div>
         <div className='absolute right-4 text-2xl'>
             {showHamburger ? <button onClick={()=>setShowHamburger(false)}><RxCross1 /></button>: <button onClick={()=>setShowHamburger(true)}><RxHamburgerMenu/></button>}
         </div>
     </nav>
     {showHamburger && <div className='flex flex-col gap-2 mb-4'>
-        {navLinks.map((item,i)=>{
-            return <div key={i} className='p-2 border-b-2 text-orange-400'>
-                {item==="completed tasks" ? `${item} (${noOfCompleted})`:item}
-            </div>
-        })}
+        <ul className='flex flex-col border-2 gap-2 p-2'>
+            <NavLink className={({isActive}) => isActive ? 'text-orange-400 text-lg underline-offset-8 underline':'text-orange-400 text-lg'} to='/completed'><li>Completed tasks ({noOfCompleted})</li></NavLink>
+            <NavLink className={({isActive}) => isActive ? 'text-orange-400 text-lg underline-offset-8 underline':'text-orange-400 text-lg'}  to='/upcoming'><li>Upcoming tasks</li></NavLink>
+        </ul>
         </div>}
     </>
   )

@@ -3,6 +3,8 @@ import Layout from "./Layouts/Layout"
 import TodayPending from "./Pages/TodayPending"
 import { useState } from "react";
 import { nanoid } from "nanoid";
+import CompletedTasks from "./Pages/CompletedTasks";
+import UpcomingTasks from "./Pages/UpcomingTasks";
 
 function App() {
 
@@ -98,13 +100,17 @@ function App() {
     const newTasks = tasks.filter((task)=>task.id!==id);
     setTasks(newTasks);
   }
-
+  
   const editTask = (id)=>{
     const taskToBeEdited = tasks.find(task=>task.id===id);
     setIsEdit(true);
     setisTasks(true);
     setFormData(taskToBeEdited);
     setEditId(id);
+  }
+
+  const clearCompleted = ()=>{
+    setCompletedTasks([]);
   }
 
   console.log(completedTasks);
@@ -128,6 +134,8 @@ function App() {
            completeTask={completeTask}
            clearTasks={clearTasks}
           />}/>
+          <Route path="completed" element={<CompletedTasks completedTasks={completedTasks} clearCompleted={clearCompleted}/>}/>
+          <Route path="upcoming" element={<UpcomingTasks/>}/>
         </Route>
       </Routes>
     </Router>
