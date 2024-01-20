@@ -124,6 +124,10 @@ function App() {
     boopSoundFunction();
     setTasks([]);
     setIsEdit(false);
+    setFormData({
+      "title":"",
+      "description":""
+    })
   }
 
 
