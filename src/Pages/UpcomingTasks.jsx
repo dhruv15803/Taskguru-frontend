@@ -2,7 +2,9 @@ import React from 'react'
 
 const UpcomingTasks = () => {
   return (
-    <div>UpcomingTasks</div>
+    <>
+    upcoming tasks
+    </>
   )
 }
 

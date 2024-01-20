@@ -1,7 +1,7 @@
 import { BrowserRouter as Router,Routes,Route } from "react-router-dom"
 import Layout from "./Layouts/Layout"
 import TodayPending from "./Pages/TodayPending"
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import CompletedTasks from "./Pages/CompletedTasks";
 import UpcomingTasks from "./Pages/UpcomingTasks";
@@ -19,6 +19,8 @@ function App() {
   const [isEdit,setIsEdit] = useState(false);
   const [editId,setEditId] = useState(null);
   const [completedTasks,setCompletedTasks] = useState([]);
+  const inputRef = useRef(null);
+  const scrollRef = useRef(null);
   const [formData,setFormData] = useState ({
     "title":"",
     "description":""
@@ -69,7 +71,7 @@ function App() {
       setTasks(newTasks);
       setEditId(null);
       setIsEdit(false);
-      setisTasks(false);
+      setisTasks(true);
       setFormData({
         "title":"",
         "description":"",
@@ -84,6 +86,7 @@ function App() {
         },3000)
         return;
       }
+      inputRef.current.focus();
       boopSoundFunction();
       setTasks(prevTasks=>{
         return [
@@ -95,7 +98,7 @@ function App() {
           }
         ]
       })
-      setisTasks(false);
+      setisTasks(true);
       setFormData({
         "title":"",
         "description":""
@@ -120,6 +123,7 @@ function App() {
   const clearTasks = ()=>{
     boopSoundFunction();
     setTasks([]);
+    setIsEdit(false);
   }
 
 
@@ -136,6 +140,9 @@ function App() {
     setisTasks(true);
     setFormData(taskToBeEdited);
     setEditId(id);
+    scrollRef.current?.scrollIntoView({
+      behavior:'smooth',
+    })
   }
 
   const clearCompleted = ()=>{
@@ -161,6 +168,8 @@ function App() {
            isEdit={isEdit}
            completeTask={completeTask}
            clearTasks={clearTasks}
+           inputRef={inputRef}
+           scrollRef={scrollRef}
           />}/>
           <Route path="completed" element={<CompletedTasks completedTasks={completedTasks} clearCompleted={clearCompleted}/>}/>
           <Route path="upcoming" element={<UpcomingTasks/>}/>
