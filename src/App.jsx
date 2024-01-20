@@ -34,13 +34,26 @@ function App() {
     })
   }
 
+  const boopSoundFunction = ()=>{
+    let sound = new Howl({
+      src:[boopSound],
+      rate:2.0,
+    });
+    sound.play();
+  }
+
+  const errorSoundFunction  = ()=>{
+    let errorSound = new Howl({
+      src:[errSound],
+      rate:2.0,
+    })
+    errorSound.play();
+  }
+
   const addTask = (e)=>{
     e.preventDefault();
     if(isEdit){
-      let sound = new Howl({
-        src:[boopSound]
-      });
-      sound.play();
+      boopSoundFunction();
       const newTasks = tasks.map((item,i)=>{
         if(item.id===editId){
           return {
@@ -64,20 +77,14 @@ function App() {
     }
     else {
       if(formData.title===""){
-        let errorSound = new Howl({
-          src:[errSound]
-        })
-        errorSound.play();
+        errorSoundFunction();
         setEmptyTaskErrorMsg("Please enter a task");
         setTimeout(()=>{
           setEmptyTaskErrorMsg("");
         },3000)
         return;
       }
-      let sound = new Howl({
-        src:[boopSound]
-      });
-      sound.play();
+      boopSoundFunction();
       setTasks(prevTasks=>{
         return [
           ...prevTasks,
@@ -97,10 +104,8 @@ function App() {
   }
 
   const completeTask = (id)=>{
-    let sound = new Howl({
-      src:[boopSound]
-    });
-    sound.play();
+    boopSoundFunction();
+
     const completedTask = tasks.find(task=>task.id===id);
     setCompletedTasks(prevCompletedTasks=>{
       return [
@@ -113,28 +118,19 @@ function App() {
   }
 
   const clearTasks = ()=>{
-    let sound = new Howl({
-      src:[boopSound]
-    });
-    sound.play();
+    boopSoundFunction();
     setTasks([]);
   }
 
 
   const deleteTask = (id)=>{
-    let sound = new Howl({
-      src:[boopSound]
-    });
-    sound.play();
+    boopSoundFunction();
     const newTasks = tasks.filter((task)=>task.id!==id);
     setTasks(newTasks);
   }
 
   const editTask = (id)=>{
-    let sound = new Howl({
-      src:[boopSound]
-    });
-    sound.play();
+    boopSoundFunction();
     const taskToBeEdited = tasks.find(task=>task.id===id);
     setIsEdit(true);
     setisTasks(true);
@@ -143,14 +139,9 @@ function App() {
   }
 
   const clearCompleted = ()=>{
-    let sound = new Howl({
-      src:[boopSound]
-    });
-    sound.play();
+    boopSoundFunction();
     setCompletedTasks([]);
   }
-
-  console.log(completedTasks);
 
   return (
     <>
