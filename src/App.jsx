@@ -5,6 +5,11 @@ import { useState } from "react";
 import { nanoid } from "nanoid";
 import CompletedTasks from "./Pages/CompletedTasks";
 import UpcomingTasks from "./Pages/UpcomingTasks";
+import {Howl, Howler} from 'howler';
+import boopSound from './Sounds/boop-sound.mp3'
+import errSound from './Sounds/error-sound.mp3'
+
+
 
 function App() {
 
@@ -32,6 +37,10 @@ function App() {
   const addTask = (e)=>{
     e.preventDefault();
     if(isEdit){
+      let sound = new Howl({
+        src:[boopSound]
+      });
+      sound.play();
       const newTasks = tasks.map((item,i)=>{
         if(item.id===editId){
           return {
@@ -55,12 +64,20 @@ function App() {
     }
     else {
       if(formData.title===""){
+        let errorSound = new Howl({
+          src:[errSound]
+        })
+        errorSound.play();
         setEmptyTaskErrorMsg("Please enter a task");
         setTimeout(()=>{
           setEmptyTaskErrorMsg("");
         },3000)
         return;
       }
+      let sound = new Howl({
+        src:[boopSound]
+      });
+      sound.play();
       setTasks(prevTasks=>{
         return [
           ...prevTasks,
@@ -80,6 +97,10 @@ function App() {
   }
 
   const completeTask = (id)=>{
+    let sound = new Howl({
+      src:[boopSound]
+    });
+    sound.play();
     const completedTask = tasks.find(task=>task.id===id);
     setCompletedTasks(prevCompletedTasks=>{
       return [
@@ -92,16 +113,28 @@ function App() {
   }
 
   const clearTasks = ()=>{
+    let sound = new Howl({
+      src:[boopSound]
+    });
+    sound.play();
     setTasks([]);
   }
 
 
   const deleteTask = (id)=>{
+    let sound = new Howl({
+      src:[boopSound]
+    });
+    sound.play();
     const newTasks = tasks.filter((task)=>task.id!==id);
     setTasks(newTasks);
   }
-  
+
   const editTask = (id)=>{
+    let sound = new Howl({
+      src:[boopSound]
+    });
+    sound.play();
     const taskToBeEdited = tasks.find(task=>task.id===id);
     setIsEdit(true);
     setisTasks(true);
@@ -110,6 +143,10 @@ function App() {
   }
 
   const clearCompleted = ()=>{
+    let sound = new Howl({
+      src:[boopSound]
+    });
+    sound.play();
     setCompletedTasks([]);
   }
 
