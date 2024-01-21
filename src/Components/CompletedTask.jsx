@@ -3,7 +3,7 @@ import { IoChevronDown } from "react-icons/io5";
 import { IoChevronUp } from 'react-icons/io5';
 
 
-const CompletedTask = ({title,description,id}) => {
+const CompletedTask = ({title,description,id,dueDate}) => {
 
     const [isShowDescription,setIsShowDescription] = useState(false);
 
@@ -22,6 +22,9 @@ const CompletedTask = ({title,description,id}) => {
         {isShowDescription && <div className='flex flex-wrap'>
             {description}
             </div>}
+        {dueDate!==undefined && <div>
+            {dueDate}
+        </div>}
     </div>
     </>
   )

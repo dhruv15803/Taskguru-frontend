@@ -12,7 +12,7 @@ const CompletedTasks = ({completedTasks,clearCompleted}) => {
             </div>}
         {completedTasks.length!==0 && <> <div className='flex flex-col my-2'>
             {completedTasks.map((item,i)=>{
-                return <CompletedTask key={i} title={item.title} description={item.description} id={item.id}/>
+                return <CompletedTask key={i} title={item.title} description={item.description} id={item.id} dueDate={item.dueDate}/>
             })}
         </div>
         <div className='flex justify-center'>

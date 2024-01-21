@@ -20,9 +20,12 @@ function App() {
   const [upcomingEmptyTaskErrorMsg,setUpcomingEmptyTaskErrorMsg] = useState("");
   const [isEdit,setIsEdit] = useState(false);
   const [editId,setEditId] = useState(null);
+  const [isUpcomingEdit,setIsUpcomingEdit] = useState(false);
+  const [upcomingEditId,setUpcomingEditId] = useState(null);
   const [completedTasks,setCompletedTasks] = useState([]);
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
+  const upcomingInputRef = useRef(null);
   const [formData,setFormData] = useState ({
     "title":"",
     "description":"",
@@ -30,7 +33,7 @@ function App() {
   const [upcomingFormData,setUpcomingFormData] = useState({
     "title":"",
     "description":"",
-    "dueDate":new Date(),
+    "dueDate":new Date().toString(),
   })
 
 
@@ -128,30 +131,56 @@ function App() {
 
   const upcomingAddTask = (e)=>{
     e.preventDefault();
-    if(upcomingFormData.title===""){
+    if(isUpcomingEdit){
       boopSoundFunction();
-      setUpcomingEmptyTaskErrorMsg("Please enter a task");
-      setTimeout(()=>{
-        setUpcomingEmptyTaskErrorMsg("");
-      },3000)
-    }
-    else{
-      setUpcomingTasks(prevUpcomingTasks=> {
-        return [
-          ...prevUpcomingTasks,
-          {
-            "id":nanoid(),
+      const newUpcomingTasks = upcomingTasks.map((item,i)=>{
+        if(upcomingEditId===item.id){
+          return {
+            ...item,
             "title":upcomingFormData.title,
             "description":upcomingFormData.description,
-            "dueDate":upcomingFormData.dueDate
+            "dueDate":upcomingFormData.dueDate,
           }
-        ]
+        }
+        else{
+          return item;
+        }
       })
+      setUpcomingTasks(newUpcomingTasks);
+      setIsUpcomingEdit(false);
       setUpcomingFormData({
         "title":"",
         "description":"",
-        "dueDate":new Date(),
+        "dueDate":new Date().toString(),
       })
+    }    else {
+      if(upcomingFormData.title===""){
+        errorSoundFunction();
+        setUpcomingEmptyTaskErrorMsg("Please enter a task");
+        setTimeout(()=>{
+          setUpcomingEmptyTaskErrorMsg("");
+        },3000)
+      }
+      else{
+        boopSoundFunction();
+        setUpcomingTasks(prevUpcomingTasks=> {
+          return [
+            ...prevUpcomingTasks,
+            {
+              "id":nanoid(),
+              "title":upcomingFormData.title,
+              "description":upcomingFormData.description,
+              "dueDate":upcomingFormData.dueDate
+            }
+          ]
+        })
+        upcomingInputRef.current.focus();
+        setUpcomingFormData({
+          "title":"",
+          "description":"",
+          "dueDate":new Date().toString(),
+        })
+      }
     }
   }
 
@@ -167,6 +196,20 @@ function App() {
     })
     const newTasks = tasks.filter(task=>task.id!==id);
     setTasks(newTasks);
+  }
+
+  const completeUpcomingTask = (id)=>{
+    boopSoundFunction();
+
+    const completedTask = upcomingTasks.find(task=>task.id===id);
+    setCompletedTasks(prevCompletedTasks=>{
+      return [
+        ...prevCompletedTasks,
+        completedTask,
+      ]
+    })
+    const newTasks = upcomingTasks.filter(task=>task.id!==id);
+    setUpcomingTasks(newTasks);
   }
 
   const clearTasks = ()=>{
@@ -185,6 +228,13 @@ function App() {
     const newTasks = tasks.filter((task)=>task.id!==id);
     setTasks(newTasks);
   }
+  
+  const deleteUpcomingTask = (id)=>{
+    boopSoundFunction();
+    const newUpcomingTasks = upcomingTasks.filter(task => task.id!==id);
+    setUpcomingTasks(newUpcomingTasks);
+  }
+
 
   const editTask = (id)=>{
     boopSoundFunction();
@@ -198,10 +248,33 @@ function App() {
     })
   }
 
+  const editUpcomingTask = (id)=>{
+    setIsUpcomingEdit(true);
+    setUpcomingEditId(id);
+    const upcomingTaskToBeEdited = upcomingTasks.find(task => task.id===id);
+    setUpcomingFormData({
+      "title":upcomingTaskToBeEdited.title,
+      "description":upcomingTaskToBeEdited.description,
+      "dueDate":upcomingTaskToBeEdited.dueDate
+    })
+  }
+
   const clearCompleted = ()=>{
     boopSoundFunction();
     setCompletedTasks([]);
   }
+
+  const clearUpcomingTasks = ()=>{
+    boopSoundFunction();
+    setUpcomingTasks([]);
+    setUpcomingFormData({
+      "title":"",
+      "description":"",
+      "dueDate":new Date().toString(),
+    })
+  }
+
+
 
   console.log(tasks);
   return (
@@ -231,10 +304,16 @@ function App() {
           />}/>
           <Route path="upcoming" element={<UpcomingTasks 
           upcomingTasks={upcomingTasks}
-           upcomingFormData={upcomingFormData} 
+          upcomingFormData={upcomingFormData} 
           handleUpcomingChange={handleUpcomingChange}
           upcomingAddTask={upcomingAddTask}
           upcomingEmptyTaskErrorMsg={upcomingEmptyTaskErrorMsg}
+          upcomingInputRef={upcomingInputRef}
+          clearUpcomingTasks={clearUpcomingTasks}
+          editUpcomingTask={editUpcomingTask}
+          deleteUpcomingTask={deleteUpcomingTask}
+          completeUpcomingTask={completeUpcomingTask}
+          isUpcomingEdit={isUpcomingEdit}
           />}/>
         </Route>
       </Routes>
