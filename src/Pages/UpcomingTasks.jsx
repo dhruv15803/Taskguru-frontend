@@ -25,7 +25,7 @@ const UpcomingTasks = ({
     <div className='m-4 p-2 text-2xl font-semibold'>
         Plan your upcoming tasks
     </div>
-    {upcomingTasks.length!==0 && <div className='flex gap-2'>
+    {upcomingTasks.length!==0 && <div className='flex gap-2 mx-4 my-4'>
       <button onClick={()=>setOverDueFilter(false)} className={`border-2 rounded-lg p-2 text-orange-400 border-orange-400 ${overDueFilter===false ? "bg-orange-400 text-white":""} `}>All</button>
       <button onClick={()=>setOverDueFilter(true)} className={`border-2 rounded-lg p-2 text-orange-400 border-orange-400 ${overDueFilter ? "bg-orange-400 text-white":""}`}>Overdue</button>
     </div>}
