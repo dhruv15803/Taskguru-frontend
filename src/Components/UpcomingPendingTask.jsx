@@ -31,7 +31,8 @@ const UpcomingPendingTask = ({id,title,description,dueDate,deleteUpcomingTask,ed
         }
       })
       setUpcomingTasks(newUpcomingTasks);
-    },[])
+    },[]);
+    
 
     return (
       <>
