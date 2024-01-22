@@ -1,7 +1,7 @@
 import { BrowserRouter as Router,Routes,Route } from "react-router-dom"
 import Layout from "./Layouts/Layout"
 import TodayPending from "./Pages/TodayPending"
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import CompletedTasks from "./Pages/CompletedTasks";
 import UpcomingTasks from "./Pages/UpcomingTasks";
@@ -13,8 +13,22 @@ import errSound from './Sounds/error-sound.mp3'
 
 function App() {
 
-  const [tasks,setTasks] = useState([]);
-  const [upcomingTasks,setUpcomingTasks] = useState([]);
+  let pendingTasks = JSON.parse(localStorage.getItem('pendingTasks'));
+  let completed = JSON.parse(localStorage.getItem('completedTasks'));
+  let upcoming = JSON.parse(localStorage.getItem('upcomingTasks'));
+
+  if(pendingTasks===null || pendingTasks===undefined){
+    pendingTasks = [];
+  }
+  if(completed===null || completed === undefined){
+    completed = [];
+  }
+  if(upcoming===null || upcoming===undefined){
+    upcoming = [];
+  }
+
+  const [tasks,setTasks] = useState(pendingTasks);
+  const [upcomingTasks,setUpcomingTasks] = useState(upcoming);
   const [isTasks,setisTasks] = useState(false);
   const [emptyTaskErrorMsg,setEmptyTaskErrorMsg] = useState("");
   const [upcomingEmptyTaskErrorMsg,setUpcomingEmptyTaskErrorMsg] = useState("");
@@ -22,7 +36,7 @@ function App() {
   const [editId,setEditId] = useState(null);
   const [isUpcomingEdit,setIsUpcomingEdit] = useState(false);
   const [upcomingEditId,setUpcomingEditId] = useState(null);
-  const [completedTasks,setCompletedTasks] = useState([]);
+  const [completedTasks,setCompletedTasks] = useState(completed);
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
   const upcomingInputRef = useRef(null);
@@ -34,9 +48,7 @@ function App() {
     "title":"",
     "description":"",
     "dueDate":new Date().toString(),
-  })
-
-
+  });
 
   const handleChange = (e)=>{
     const {name,value} = e.target;
@@ -129,8 +141,20 @@ function App() {
   }
 
 
+
+
   const upcomingAddTask = (e)=>{
     e.preventDefault();
+    let currDate = new Date();
+    let isOverdue = false;
+    const specificDate = new Date(upcomingFormData.dueDate);
+    console.log(specificDate < currDate);
+    if(specificDate < currDate){
+      isOverdue = true;
+    }
+    else{
+      isOverdue = false;
+    }    
     if(isUpcomingEdit){
       boopSoundFunction();
       const newUpcomingTasks = upcomingTasks.map((item,i)=>{
@@ -170,7 +194,8 @@ function App() {
               "id":nanoid(),
               "title":upcomingFormData.title,
               "description":upcomingFormData.description,
-              "dueDate":upcomingFormData.dueDate
+              "dueDate":upcomingFormData.dueDate,
+              "overdue":isOverdue,
             }
           ]
         })
@@ -274,9 +299,15 @@ function App() {
     })
   }
 
+  useEffect(()=>{
+    localStorage.setItem('pendingTasks',JSON.stringify(tasks));
+    localStorage.setItem('completedTasks',JSON.stringify(completedTasks));
+    localStorage.setItem('upcomingTasks',JSON.stringify(upcomingTasks));
+  },[tasks,completedTasks,upcomingTasks])
+
+  console.log(upcomingTasks);
 
 
-  console.log(tasks);
   return (
     <>
     <Router>
@@ -314,7 +345,8 @@ function App() {
           deleteUpcomingTask={deleteUpcomingTask}
           completeUpcomingTask={completeUpcomingTask}
           isUpcomingEdit={isUpcomingEdit}
-          />}/>
+          setUpcomingTasks={setUpcomingTasks}
+           />}/>
         </Route>
       </Routes>
     </Router>
