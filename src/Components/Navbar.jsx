@@ -12,6 +12,11 @@ const Navbar = ({noOfCompleted,logout}) => {
 
     console.log(loggedInUser,"navbar");
 
+    const logoutFn = ()=>{
+        logout();
+        setShowHamburger(false);
+    }
+    
     return (
     <>
     <nav className='flex items-center p-2 bg-orange-400 text-white'>
@@ -27,7 +32,7 @@ const Navbar = ({noOfCompleted,logout}) => {
         <ul className='flex flex-col gap-2 p-2'>
             <NavLink onClick={()=>setShowHamburger(false)} className={({isActive}) => isActive ? 'text-white text-lg underline-offset-8 underline':'text-white text-lg'} to='/completed'><li>Completed tasks ({noOfCompleted})</li></NavLink>
             <NavLink onClick={()=>setShowHamburger(false)} className={({isActive}) => isActive ? 'text-white text-lg underline-offset-8 underline':'text-white  text-lg'}  to='/upcoming'><li>Upcoming tasks</li></NavLink>
-            {loggedInUser!==null ? <li><button onClick={logout} className='text-white text-lg'>Logout</button></li> : 
+            {loggedInUser!==null ? <li><button onClick={logoutFn} className='text-white text-lg'>Logout</button></li> : 
             <NavLink onClick={()=>setShowHamburger(false)} className={({isActive}) => isActive ? 'text-white text-lg underline-offset-8 underline':'text-white text-lg'} to='/login'>Login</NavLink>
             }
             {loggedInUser===null && <NavLink onClick={()=>setShowHamburger(false)} className={({isActive}) => isActive ? 'text-white text-lg underline-offset-8 underline':'text-white text-lg'} to='/register'>Register</NavLink>}

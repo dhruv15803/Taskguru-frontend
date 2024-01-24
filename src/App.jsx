@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BrowserRouter as Router,Routes,Route } from "react-router-dom"
 import Layout from "./Layouts/Layout"
@@ -18,22 +19,22 @@ export const ListContext = React.createContext();
 
 function App() {
 
-  let pendingTasks = JSON.parse(localStorage.getItem('pendingTasks'));
-  let completed = JSON.parse(localStorage.getItem('completedTasks'));
-  let upcoming = JSON.parse(localStorage.getItem('upcomingTasks'));
+  // let pendingTasks = JSON.parse(localStorage.getItem('pendingTasks'));
+  // let completed = JSON.parse(localStorage.getItem('completedTasks'));
+  // let upcoming = JSON.parse(localStorage.getItem('upcomingTasks'));
 
-  if(pendingTasks===null || pendingTasks===undefined){
-    pendingTasks = [];
-  }
-  if(completed===null || completed === undefined){
-    completed = [];
-  }
-  if(upcoming===null || upcoming===undefined){
-    upcoming = [];
-  }
+  // if(pendingTasks===null || pendingTasks===undefined){
+  //   pendingTasks = [];
+  // }
+  // if(completed===null || completed === undefined){
+  //   completed = [];
+  // }
+  // if(upcoming===null || upcoming===undefined){
+  //   upcoming = [];
+  // }
 
-  const [tasks,setTasks] = useState(pendingTasks);
-  const [upcomingTasks,setUpcomingTasks] = useState(upcoming);
+  const [tasks,setTasks] = useState([]);
+  const [upcomingTasks,setUpcomingTasks] = useState([]);
   const [isTasks,setisTasks] = useState(false);
   const [emptyTaskErrorMsg,setEmptyTaskErrorMsg] = useState("");
   const [upcomingEmptyTaskErrorMsg,setUpcomingEmptyTaskErrorMsg] = useState("");
@@ -41,7 +42,7 @@ function App() {
   const [editId,setEditId] = useState(null);
   const [isUpcomingEdit,setIsUpcomingEdit] = useState(false);
   const [upcomingEditId,setUpcomingEditId] = useState(null);
-  const [completedTasks,setCompletedTasks] = useState(completed);
+  const [completedTasks,setCompletedTasks] = useState([]);
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
   const upcomingInputRef = useRef(null);
@@ -102,6 +103,31 @@ function App() {
     errorSound.play();
   }
 
+  const postTask = async ()=>{
+    try {
+      const response = await axios.post('http://localhost:5000/tasks/add',{
+        "id":nanoid(),
+        "title":formData.title,
+        "description":formData.description,
+      },{
+        withCredentials:true,
+      });
+      console.log(response); 
+      setTasks(prevTasks=>{
+        return [
+          ...prevTasks,
+          {
+            "id":response.data.task.id,
+            "title":response.data.task.title,
+            "description":response.data.task.description,
+          }
+        ]
+      })
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const addTask = (e)=>{
     e.preventDefault();
     if(isEdit){
@@ -118,6 +144,21 @@ function App() {
           return item;
         }
       })
+      const postEdit = async ()=>{
+        try {
+          const response = await axios.post('http://localhost:5000/tasks/update',{
+            "newTitle":formData.title,
+            "newDescription":formData.description,
+            "id":editId,
+          },{
+            withCredentials:true,
+          })
+          console.log(response);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+      postEdit();
       setTasks(newTasks);
       setEditId(null);
       setIsEdit(false);
@@ -138,16 +179,7 @@ function App() {
       }
       inputRef?.current?.focus();
       boopSoundFunction();
-      setTasks(prevTasks=>{
-        return [
-          ...prevTasks,
-          {
-            "id":nanoid(),
-            "title":formData.title,
-            "description":formData.description,
-          }
-        ]
-      })
+      postTask();
       setisTasks(true);
       setFormData({
         "title":"",
@@ -255,6 +287,17 @@ function App() {
 
   const clearTasks = ()=>{
     boopSoundFunction();
+    const postClearAllTasks = async ()=>{
+try {
+        const response = await axios.get('http://localhost:5000/tasks/deleteAll',{
+          withCredentials:true,
+        });
+        console.log(response);
+} catch (error) {
+  console.log(error);
+}
+    }
+    postClearAllTasks();
     setTasks([]);
     setIsEdit(false);
     setFormData({
@@ -267,6 +310,19 @@ function App() {
   const deleteTask = (id)=>{
     boopSoundFunction();
     const newTasks = tasks.filter((task)=>task.id!==id);
+    const postDelete = async ()=>{
+      try {
+        const response = await axios.post('http://localhost:5000/tasks/delete',{
+          id,
+        },{
+          withCredentials:true,
+        })
+        console.log(response); 
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    postDelete();
     setTasks(newTasks);
   }
   
@@ -391,30 +447,40 @@ function App() {
     }
   }
 
+  const getAllTasks = async ()=>{
+    try {
+        const response = await axios.get('http://localhost:5000/tasks/getAll',{
+        withCredentials:true,
+      });
+      setTasks(response.data.userTasks);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const logout = async  ()=>{
     try {
       const response = await axios.get('http://localhost:5000/user/logout',{
         withCredentials:true,
       })
       console.log(response.data);
-      setLoggedInUser(null); 
+      setLoggedInUser(null);
+      setTasks([]); 
     } catch (error) {
       console.log(error);
     }
   }
 
-
   useEffect(()=>{
+    getAllTasks();
     getLoggedInUser();
   },[])
 
-  console.log(loggedInUser);
-
-  useEffect(()=>{
-    localStorage.setItem('pendingTasks',JSON.stringify(tasks));
-    localStorage.setItem('completedTasks',JSON.stringify(completedTasks));
-    localStorage.setItem('upcomingTasks',JSON.stringify(upcomingTasks));
-  },[tasks,completedTasks,upcomingTasks])
+  // useEffect(()=>{
+  //   localStorage.setItem('pendingTasks',JSON.stringify(tasks));
+  //   localStorage.setItem('completedTasks',JSON.stringify(completedTasks));
+  //   localStorage.setItem('upcomingTasks',JSON.stringify(upcomingTasks));
+  // },[tasks,completedTasks,upcomingTasks])
 
   return (
     <>
