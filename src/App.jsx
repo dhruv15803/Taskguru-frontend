@@ -1,14 +1,19 @@
+import React from "react";
 import { BrowserRouter as Router,Routes,Route } from "react-router-dom"
 import Layout from "./Layouts/Layout"
 import TodayPending from "./Pages/TodayPending"
-import { useEffect, useRef, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import CompletedTasks from "./Pages/CompletedTasks";
 import UpcomingTasks from "./Pages/UpcomingTasks";
 import {Howl, Howler} from 'howler';
 import boopSound from './Sounds/boop-sound.mp3'
-import errSound from './Sounds/error-sound.mp3'
+import errSound from './Sounds/error-sound.mp3';
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import axios from 'axios'
 
+export const ListContext = React.createContext();
 
 
 function App() {
@@ -40,6 +45,17 @@ function App() {
   const inputRef = useRef(null);
   const scrollRef = useRef(null);
   const upcomingInputRef = useRef(null);
+  const [loggedInUser,setLoggedInUser] = useState(null);
+  const [registerErrorMsg,setRegisterErrorMsg] = useState("");
+  const [registerFormData,setRegisterFormData] = useState({
+    "username":"",
+    "email":"",
+    "password":"",
+  })
+  const [loginFormData,setLoginFormData] = useState({
+    "email":"",
+    "password":"",
+  })
   const [formData,setFormData] = useState ({
     "title":"",
     "description":"",
@@ -299,20 +315,113 @@ function App() {
     })
   }
 
+  const handleRegisterFormChange = (e)=>{
+    const {name,value} = e.target;
+    setRegisterFormData(prevFormData=>{
+      return {
+        ...prevFormData,
+        [name]:value,
+      }
+    })
+  }
+
+  const handleLoginFormChange = (e)=>{
+    const {name,value} = e.target;
+    setLoginFormData(prevFormData=>{
+      return {
+        ...prevFormData,
+        [name]:value,
+      }
+    })
+  }
+
+
+  const registerUser = (e)=>{
+    e.preventDefault();
+    try {
+      const postRegisterData = async ()=>{
+        const response = await axios.post('http://localhost:5000/user/register',registerFormData);
+          setRegisterErrorMsg(response.data.message);
+          setTimeout(()=>{
+            setRegisterErrorMsg('');
+          },3000)
+      }
+      postRegisterData();
+      setRegisterFormData({
+        "username":"",
+        "email":"",
+        "password":""
+      })
+      window.location = '/login'; 
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const loginUser = (e)=>{
+    e.preventDefault();
+    try {
+      const postLoginData = async ()=>{
+        const response = await axios.post('http://localhost:5000/user/login',loginFormData,{
+          withCredentials:true,
+        });
+        console.log(response.data);
+        setLoggedInUser({
+          "_id":response.data.loggedInUser._id,
+          "email":response.data.loggedInUser.email,
+          "username":response.data.loggedInUser.username,
+          "password":response.data.loggedInUser.password,
+        })
+        window.location = '/'
+      }
+      postLoginData(); 
+    } catch (error) {
+      console.log(error); 
+    }
+  }
+  
+  const getLoggedInUser = async ()=>{
+    try {
+      const response = await axios.get('http://localhost:5000/user/loggedIn',{
+        withCredentials:true,
+      });
+      setLoggedInUser(response.data.loggedInUser);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const logout = async  ()=>{
+    try {
+      const response = await axios.get('http://localhost:5000/user/logout',{
+        withCredentials:true,
+      })
+      console.log(response.data);
+      setLoggedInUser(null); 
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  useEffect(()=>{
+    getLoggedInUser();
+  },[])
+
+  console.log(loggedInUser);
+
   useEffect(()=>{
     localStorage.setItem('pendingTasks',JSON.stringify(tasks));
     localStorage.setItem('completedTasks',JSON.stringify(completedTasks));
     localStorage.setItem('upcomingTasks',JSON.stringify(upcomingTasks));
   },[tasks,completedTasks,upcomingTasks])
 
-  console.log(upcomingTasks);
-
-
   return (
     <>
+    <ListContext.Provider value={{loggedInUser}}>
     <Router>
       <Routes>
-        <Route path="/" element={<Layout noOfCompleted={completedTasks.length}/>}>
+        <Route path="/" element={<Layout noOfCompleted={completedTasks.length} logout={logout}/>}>
           <Route index element={<TodayPending 
           tasks={tasks} 
           formData={formData} 
@@ -347,9 +456,12 @@ function App() {
           isUpcomingEdit={isUpcomingEdit}
           setUpcomingTasks={setUpcomingTasks}
            />}/>
+          <Route path="login" element={<Login loginUser={loginUser} handleLoginFormChange={handleLoginFormChange} loginFormData={loginFormData}  />}/>
+          <Route path="register" element={<Register registerErrorMsg={registerErrorMsg} registerUser={registerUser} registerFormData={registerFormData} handleRegisterFormChange={handleRegisterFormChange}/>} />
         </Route>
       </Routes>
     </Router>
+    </ListContext.Provider>
     </>
   )
 }
