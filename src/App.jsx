@@ -32,6 +32,7 @@ function App() {
   // if(upcoming===null || upcoming===undefined){
   //   upcoming = [];
   // }
+  const [isAddingPendingTask,setIsAddingPendingTask] = useState(false);
 
   const [tasks,setTasks] = useState([]);
   const [upcomingTasks,setUpcomingTasks] = useState([]);
@@ -48,6 +49,7 @@ function App() {
   const upcomingInputRef = useRef(null);
   const [loggedInUser,setLoggedInUser] = useState(null);
   const [registerErrorMsg,setRegisterErrorMsg] = useState("");
+  const [loginErrorMsg,setLoginErrorMsg] = useState("");
   const [registerFormData,setRegisterFormData] = useState({
     "username":"",
     "email":"",
@@ -189,8 +191,6 @@ function App() {
   }
 
 
-
-
   const upcomingAddTask = (e)=>{
     e.preventDefault();
     let currDate = new Date();
@@ -212,12 +212,28 @@ function App() {
             "title":upcomingFormData.title,
             "description":upcomingFormData.description,
             "dueDate":upcomingFormData.dueDate,
+            "overdue":isOverdue,
           }
         }
         else{
           return item;
         }
       })
+      const postUpdateUpcoming = async ()=>{
+        try {
+                const res = await axios.post('http://localhost:5000/upcomingTasks/update',{
+                  "id":upcomingEditId,
+                  "newTitle":upcomingFormData.title,
+                  "newDescription":upcomingFormData.description,
+                  "newDueDate":upcomingFormData.dueDate,
+                  "newOverDue":isOverdue,
+                },{withCredentials:true})
+                console.log(res);
+        } catch (error) {
+          console.log(error);
+        }
+            }
+      postUpdateUpcoming();
       setUpcomingTasks(newUpcomingTasks);
       setIsUpcomingEdit(false);
       setUpcomingFormData({
@@ -247,6 +263,21 @@ function App() {
             }
           ]
         })
+        const postUpcomingTask = async ()=>{
+          try {
+            const response = await axios.post('http://localhost:5000/upcomingTasks/add',{
+                "id":nanoid(),
+                "title":upcomingFormData.title,
+                "description":upcomingFormData.description,
+                "dueDate":upcomingFormData.dueDate,
+                "overdue":isOverdue,
+              },{withCredentials:true});
+              console.log(response);
+            } catch (error) {
+              console.log(error);
+          } 
+        }
+        postUpcomingTask();
         upcomingInputRef.current.focus();
         setUpcomingFormData({
           "title":"",
@@ -267,6 +298,15 @@ function App() {
         completedTask,
       ]
     })
+    const postComplete = async ()=>{
+      try {
+        const res = await axios.post('http://localhost:5000/tasks/complete',{id},{withCredentials:true});
+        console.log(res); 
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    postComplete();
     const newTasks = tasks.filter(task=>task.id!==id);
     setTasks(newTasks);
   }
@@ -281,6 +321,15 @@ function App() {
         completedTask,
       ]
     })
+    const postComplete = async ()=>{
+      try {
+        const res = await axios.post('http://localhost:5000/tasks/complete',{id},{withCredentials:true});
+        console.log(res); 
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    postComplete();
     const newTasks = upcomingTasks.filter(task=>task.id!==id);
     setUpcomingTasks(newTasks);
   }
@@ -329,6 +378,17 @@ try {
   const deleteUpcomingTask = (id)=>{
     boopSoundFunction();
     const newUpcomingTasks = upcomingTasks.filter(task => task.id!==id);
+    const postDeleteUpcoming = async ()=>{
+      try {
+        const response = await axios.post('http://localhost:5000/upcomingTasks/delete',{
+          id,
+        },{withCredentials:true})
+        console.log(response); 
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    postDeleteUpcoming();
     setUpcomingTasks(newUpcomingTasks);
   }
 
@@ -346,23 +406,39 @@ try {
   }
 
   const editUpcomingTask = (id)=>{
+    boopSoundFunction();
     setIsUpcomingEdit(true);
+    setIsAddingPendingTask(true);
     setUpcomingEditId(id);
     const upcomingTaskToBeEdited = upcomingTasks.find(task => task.id===id);
-    setUpcomingFormData({
-      "title":upcomingTaskToBeEdited.title,
-      "description":upcomingTaskToBeEdited.description,
-      "dueDate":upcomingTaskToBeEdited.dueDate
-    })
+    setUpcomingFormData(upcomingTaskToBeEdited);
   }
 
   const clearCompleted = ()=>{
     boopSoundFunction();
     setCompletedTasks([]);
+    const deleteAllCompleted = async ()=>{
+try {
+        const res = await axios.get('http://localhost:5000/tasks/deleteCompleted',{withCredentials:true});
+        console.log(res);
+} catch (error) {
+  console.log(error);
+}
+    }
+    deleteAllCompleted();
   }
 
   const clearUpcomingTasks = ()=>{
     boopSoundFunction();
+    const clearUpcoming = async ()=>{
+try {
+        const res = await axios.get('http://localhost:5000/upcomingTasks/deleteAll',{withCredentials:true});
+        console.log(res);
+} catch (error) {
+  console.log(error);
+}
+    }
+    clearUpcoming();
     setUpcomingTasks([]);
     setUpcomingFormData({
       "title":"",
@@ -390,14 +466,14 @@ try {
       }
     })
   }
-
+  
 
   const registerUser = (e)=>{
     e.preventDefault();
     try {
       const postRegisterData = async ()=>{
         const response = await axios.post('http://localhost:5000/user/register',registerFormData);
-          setRegisterErrorMsg(response.data.message);
+        setRegisterErrorMsg(response.data.message);
           setTimeout(()=>{
             setRegisterErrorMsg('');
           },3000)
@@ -408,7 +484,6 @@ try {
         "email":"",
         "password":""
       })
-      window.location = '/login'; 
     } catch (error) {
       console.log(error);
     }
@@ -422,6 +497,10 @@ try {
           withCredentials:true,
         });
         console.log(response.data);
+        setLoginErrorMsg(response.data.message);
+        setTimeout(()=>{
+          setLoginErrorMsg("");
+        },3000)
         setLoggedInUser({
           "_id":response.data.loggedInUser._id,
           "email":response.data.loggedInUser.email,
@@ -458,6 +537,26 @@ try {
     }
   }
 
+  const getAllUpcomingTasks = async ()=>{
+try {
+      const response = await axios.get('http://localhost:5000/upcomingTasks/getAll',{withCredentials:true});
+      console.log(response);
+      setUpcomingTasks(response.data.data);
+} catch (error) {
+  console.log(error);
+}
+  }
+
+  const getAllCompleted = async ()=>{
+    try {
+      const res = await axios.get('http://localhost:5000/tasks/getCompleted',{withCredentials:true});
+      console.log(res); 
+      setCompletedTasks(res.data.completedTasks);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const logout = async  ()=>{
     try {
       const response = await axios.get('http://localhost:5000/user/logout',{
@@ -466,15 +565,19 @@ try {
       console.log(response.data);
       setLoggedInUser(null);
       setTasks([]); 
+      setUpcomingTasks([]); 
+      setCompletedTasks([]);
     } catch (error) {
       console.log(error);
     }
   }
 
-  useEffect(()=>{
-    getAllTasks();
-    getLoggedInUser();
-  },[])
+    useEffect(()=>{
+      getAllTasks();
+      getLoggedInUser();
+      getAllUpcomingTasks();
+      getAllCompleted();
+    },[])
 
   // useEffect(()=>{
   //   localStorage.setItem('pendingTasks',JSON.stringify(tasks));
@@ -503,10 +606,12 @@ try {
            clearTasks={clearTasks}
            inputRef={inputRef}
            scrollRef={scrollRef}
+           loggedInUser={loggedInUser}
           />}/>
           <Route path="completed" element={<CompletedTasks
            completedTasks={completedTasks}
            clearCompleted={clearCompleted}
+           loggedInUser={loggedInUser}
           />}/>
           <Route path="upcoming" element={<UpcomingTasks 
           upcomingTasks={upcomingTasks}
@@ -521,8 +626,11 @@ try {
           completeUpcomingTask={completeUpcomingTask}
           isUpcomingEdit={isUpcomingEdit}
           setUpcomingTasks={setUpcomingTasks}
+          isAddingPendingTask={isAddingPendingTask}
+          setIsAddingPendingTask={setIsAddingPendingTask}
+          loggedInUser={loggedInUser}
            />}/>
-          <Route path="login" element={<Login loginUser={loginUser} handleLoginFormChange={handleLoginFormChange} loginFormData={loginFormData}  />}/>
+          <Route path="login" element={<Login loginUser={loginUser} handleLoginFormChange={handleLoginFormChange} loginFormData={loginFormData} loginErrorMsg={loginErrorMsg} />}/>
           <Route path="register" element={<Register registerErrorMsg={registerErrorMsg} registerUser={registerUser} registerFormData={registerFormData} handleRegisterFormChange={handleRegisterFormChange}/>} />
         </Route>
       </Routes>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import UpcomingPendingTask from '../Components/UpcomingPendingTask'
+import NotLoggedIn from './NotLoggedIn';
 
 const UpcomingTasks = ({
     upcomingFormData,
@@ -13,16 +14,23 @@ const UpcomingTasks = ({
     deleteUpcomingTask,
     completeUpcomingTask,
     isUpcomingEdit,
-    setUpcomingTasks
+    setUpcomingTasks,
+    isAddingPendingTask,
+    setIsAddingPendingTask,
+    loggedInUser,
     }) => {
 
-      const [isAddingPendingTask,setIsAddingPendingTask] = useState(false);
       const [overDueFilter,setOverDueFilter] = useState(false);
 
 
   return (
     <>
-    <div className='m-4 p-2 text-2xl font-semibold'>
+    {loggedInUser===null ? 
+    <>
+    <NotLoggedIn/>
+    </>:
+    <>
+        <div className='m-4 p-2 text-2xl font-semibold'>
         Plan your upcoming tasks
     </div>
     {upcomingTasks.length!==0 && <div className='flex gap-2 mx-4 my-4'>
@@ -75,6 +83,7 @@ const UpcomingTasks = ({
         <input className='p-2 border-2 rounded-lg' value={upcomingFormData.dueDate} onChange={handleUpcomingChange} type="datetime-local" name="dueDate" id="" />
         <button>{isUpcomingEdit ? "edit":"Add task"}</button>
     </form>}
+    </>}
     </>
   )
 }

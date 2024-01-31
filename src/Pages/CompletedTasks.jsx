@@ -1,11 +1,18 @@
 import React from 'react'
 import CompletedTask from '../Components/CompletedTask';
 import { Link } from 'react-router-dom';
+import NotLoggedIn from './NotLoggedIn';
 
-const CompletedTasks = ({completedTasks,clearCompleted}) => {
+const CompletedTasks = ({completedTasks,clearCompleted,loggedInUser}) => {
   return (
     <>
-     <div className='flex flex-col  m-4 p-2'>
+    {loggedInUser===null ? 
+    <>
+    <NotLoggedIn/>
+    </> :
+  
+  <>
+  <div className='flex flex-col  m-4 p-2'>
         <h1 className='text-2xl font-bold'>Completed tasks</h1>
         {completedTasks.length===0 && <div className='text-orange-400 text-lg'>
             You have no completed tasks. <Link className='font-bold' to='/'>Click here</Link>
@@ -19,6 +26,8 @@ const CompletedTasks = ({completedTasks,clearCompleted}) => {
         <button onClick={clearCompleted} className='text-orange-400 p-2 my-2 border-2 rounded-lg border-orange-400 hover:bg-orange-400 hover:text-white hover:duration-300'>Clear completed</button>
         </div></>}
     </div>
+    </>}
+  
     </>
   )
 }

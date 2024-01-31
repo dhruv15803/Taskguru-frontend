@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { RxPencil2 } from "react-icons/rx";
 import { ImCross } from "react-icons/im";
 import PendingTask from '../Components/PendingTask';
+import NotLoggedIn from './NotLoggedIn';
 
 const TodayPending = ({
     tasks,
@@ -17,12 +18,19 @@ const TodayPending = ({
     completeTask,
     clearTasks,
     inputRef,
-    scrollRef
+    scrollRef,
+    loggedInUser,
     }) => {
 
   return (
     <>
-    {tasks.length!==0 && <div>
+    {loggedInUser===null ? 
+    <>
+    <NotLoggedIn/>
+    </> :
+     
+    <>
+        {tasks.length!==0 && <div>
         {tasks.map((item,i)=>{
             return <PendingTask completeTask={completeTask} editTask={editTask} deleteTask={deleteTask} key={item.id} id={item.id} title={item.title} description={item.description} />
         })} 
@@ -51,9 +59,7 @@ const TodayPending = ({
     <div className='my-2 flex justify-center text-xl'>
         {emptyTaskErrorMsg}
         </div> </>}
-
-        <>
-    </>
+    </>}
     </>
   )
 }
